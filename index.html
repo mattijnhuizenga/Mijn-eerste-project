@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="nl">
 <head>
@@ -435,14 +437,16 @@
   </footer>
 
   <script>
+    "use strict";
+
     const taxRules = {
-      firstLimit: 38_883,
-      secondLimit: 78_426,
+      firstLimit: 38883,
+      secondLimit: 78426,
       firstRate: 0.3575,
       secondRate: 0.3756,
       topRate: 0.495,
-      selfEmployedDeduction: 1_200,
-      starterDeduction: 2_123,
+      selfEmployedDeduction: 1200,
+      starterDeduction: 2123,
       profitExemptionRate: 0.127,
     };
 
@@ -468,12 +472,13 @@
       // Ook aftrek die de winst deels uit schijf 3 haalt valt onder de tariefbeperking.
       const deductionInTopBand = Math.min(
         Math.max(0, deduction + exemption),
-        Math.max(0, profit - taxRules.secondLimit),
+        Math.max(0, profit - taxRules.secondLimit)
       );
-
       const correction = deductionInTopBand * (taxRules.topRate - taxRules.secondRate);
       const tax = firstBand * taxRules.firstRate
-        + secondBand * taxRules.secondRate + topBand * taxRules.topRate + correction;
+        + secondBand * taxRules.secondRate
+        + topBand * taxRules.topRate
+        + correction;
       const netYear = profit - tax;
 
       return { revenue, profit, taxable, tax, netYear, netMonth: netYear / 12 };
@@ -481,18 +486,26 @@
 
     const byId = (id) => document.getElementById(id);
     const form = byId("calculator");
-    const numberInputs = ["rate", "hours", "weeks", "costs"].map(byId);
+    const rateInput = byId("rate");
+    const numberInputs = [rateInput, byId("hours"), byId("weeks"), byId("costs")];
     const eligible = byId("eligible");
     const starter = byId("starter");
+    const distribution = byId("distribution");
+    const error = byId("error");
+
     const money = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
-    const percentage = new Intl.NumberFormat("nl-NL", { style: "percent", maximumFractionDigits: 1 });
-    const outputIds = {
-      revenue: "revenue",
-      profit: "profit",
-      taxable: "taxable",
-      tax: "tax",
-      netYear: "net-year",
-      netMonth: "net-month",
+    const percentage = new Intl.NumberFormat("nl-NL", {
+      style: "percent",
+      maximumFractionDigits: 1,
+    });
+
+    const outputs = {
+      revenue: byId("revenue"),
+      profit: byId("profit"),
+      taxable: byId("taxable"),
+      tax: byId("tax"),
+      netYear: byId("net-year"),
+      netMonth: byId("net-month"),
     };
 
     function updateDistribution({ revenue, netYear, tax }, costs) {
@@ -512,103 +525,85 @@
 
       const note = byId("distribution-note");
       note.hidden = revenue > 0 && netYear >= 0;
-      if (netYear < 0) {
-        note.textContent = `Tekort na kosten en belasting: ${money.format(-netYear)}.`;
-      } else {
-        note.textContent = "Er is geen omzet te verdelen.";
-      }
+      note.textContent = netYear < 0
+        ? `Tekort na kosten en belasting: ${money.format(-netYear)}.`
+        : "Er is geen omzet te verdelen.";
     }
 
     function updateResults() {
       starter.disabled = !eligible.checked;
+
       const [rate, hours, weeks, costs] = numberInputs.map((input) => input.valueAsNumber);
       const results = calculateIncome(rate, hours, weeks, costs, eligible.checked, starter.checked);
       const valid = numberInputs.every((input) => input.validity.valid)
         && Object.values(results).every(Number.isFinite);
 
-      byId("error").hidden = valid;
-      byId("distribution").hidden = !valid;
-      for (const [key, id] of Object.entries(outputIds)) {
-        byId(id).textContent = valid ? money.format(results[key]) : "—";
+      error.hidden = valid;
+      distribution.hidden = !valid;
+
+      for (const [key, output] of Object.entries(outputs)) {
+        output.textContent = valid ? money.format(results[key]) : "—";
       }
-      if (valid) updateDistribution(results, costs);
+
+      if (valid) {
+        updateDistribution(results, costs);
+      }
+
+      return valid;
     }
 
+    // Het script staat onder de HTML, dus de velden bestaan al bij de eerste berekening.
     form.addEventListener("input", updateResults);
     form.addEventListener("submit", (event) => event.preventDefault());
     updateResults();
+  </script>
 
-    // Indicatieve bedragen per uur, exclusief btw.
-    const industryRates = {
-      it: {
-        rate: 90,
-        junior: [55, 75],
-        medior: [75, 100],
-        senior: [100, 140],
-      },
-      marketing: {
-        rate: 75,
-        junior: [45, 60],
-        medior: [60, 85],
-        senior: [85, 115],
-      },
-      construction: {
-        rate: 60,
-        junior: [35, 50],
-        medior: [50, 70],
-        senior: [70, 95],
-      },
-      care: {
-        rate: 55,
-        junior: [35, 45],
-        medior: [45, 65],
-        senior: [65, 90],
-      },
-      design: {
-        rate: 65,
-        junior: [40, 55],
-        medior: [55, 80],
-        senior: [80, 110],
-      },
-      consulting: {
-        rate: 95,
-        junior: [60, 80],
-        medior: [80, 110],
-        senior: [110, 160],
-      },
-    };
+  <script>
+    // De branchekeuzehulp heeft een eigen script, los van de initialisatie van de calculator.
+    {
+      const industryRates = {
+        it: { rate: 90, junior: [55, 75], medior: [75, 100], senior: [100, 140] },
+        marketing: { rate: 75, junior: [45, 60], medior: [60, 85], senior: [85, 115] },
+        construction: { rate: 60, junior: [35, 50], medior: [50, 70], senior: [70, 95] },
+        care: { rate: 55, junior: [35, 45], medior: [45, 65], senior: [65, 90] },
+        design: { rate: 65, junior: [40, 55], medior: [55, 80], senior: [80, 110] },
+        consulting: { rate: 95, junior: [60, 80], medior: [80, 110], senior: [110, 160] },
+      };
 
-    const industrySelect = byId("industry-select");
-    const wholeEuros = new Intl.NumberFormat("nl-NL", {
-      style: "currency",
-      currency: "EUR",
-      maximumFractionDigits: 0,
-    });
+      const industrySelect = byId("industry-select");
+      const resultHeading = byId("result-heading");
+      const wholeEuros = new Intl.NumberFormat("nl-NL", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0,
+      });
 
-    function updateIndustry() {
-      const industry = industryRates[industrySelect.value];
-      byId("industry-rate").textContent = `${wholeEuros.format(industry.rate)} per uur`;
+      function updateIndustry() {
+        const industry = industryRates[industrySelect.value];
+        byId("industry-rate").textContent = wholeEuros.format(industry.rate) + " per uur";
 
-      for (const level of ["junior", "medior", "senior"]) {
-        const [minimum, maximum] = industry[level];
-        byId(\`industry-\${level}\`).textContent =
-          \`\${wholeEuros.format(minimum)}–\${wholeEuros.format(maximum)}\`;
+        for (const level of ["junior", "medior", "senior"]) {
+          const [minimum, maximum] = industry[level];
+          byId("industry-" + level).textContent =
+            wholeEuros.format(minimum) + "–" + wholeEuros.format(maximum);
+        }
       }
+
+      industrySelect.addEventListener("change", updateIndustry);
+      byId("use-industry-rate").addEventListener("click", () => {
+        rateInput.valueAsNumber = industryRates[industrySelect.value].rate;
+
+        if (updateResults()) {
+          resultHeading.focus({ preventScroll: true });
+          resultHeading.scrollIntoView({ block: "start" });
+        } else {
+          form.reportValidity();
+        }
+      });
+
+      updateIndustry();
+      byId("industry-tool").hidden = false;
     }
-
-    industrySelect.addEventListener("change", updateIndustry);
-    byId("use-industry-rate").addEventListener("click", () => {
-      byId("rate").valueAsNumber = industryRates[industrySelect.value].rate;
-      updateResults();
-
-      if (form.reportValidity()) {
-        byId("result-heading").focus({ preventScroll: true });
-        byId("result-heading").scrollIntoView({ block: "start" });
-      }
-    });
-
-    updateIndustry();
-    byId("industry-tool").hidden = false;
   </script>
 </body>
 </html>
