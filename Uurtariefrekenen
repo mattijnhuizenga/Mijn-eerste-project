@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bereken je netto inkomen als zzp'er in Nederland met de belastingtarieven van 2026.">
+  <meta name="theme-color" content="#f4f6f5">
+  <title>ZZP Netto Inkomen &amp; Uurtarief Calculator 2026</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #142b28;
+      --muted: #4f625e;
+      --line: #dce5e0;
+      --green: #17624e;
+      --net: #86e0b5;
+      --cost: #f3c781;
+      --tax: #91b3da;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f6f5; color: var(--ink); line-height: 1.5; }
+    .page { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: clamp(28px, 6vw, 66px) 0 32px; }
+    header { margin-bottom: 28px; }
+    .scope { color: var(--green); font-size: .875rem; font-weight: 750; margin: 0 0 8px; }
+    h1 { margin: 0; font-size: clamp(1.9rem, 5vw, 3.35rem); line-height: 1.07; letter-spacing: -.045em; }
+    header > p:last-child { margin: 12px 0 0; color: var(--muted); }
+    .calculator { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+    .card { border: 1px solid var(--line); background: #fff; border-radius: 20px; padding: clamp(18px, 3.2vw, 30px); box-shadow: 0 8px 24px #142b2808; }
+    h2 { margin: 0 0 20px; font-size: 1.25rem; letter-spacing: -.02em; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+    .field { display: flex; flex-direction: column; justify-content: end; gap: 6px; font-size: .875rem; font-weight: 650; }
+    .field small { font-size: inherit; font-weight: 400; color: var(--muted); }
+    .input { display: flex; align-items: center; gap: 7px; border: 1px solid #aebfb7; border-radius: 9px; padding: 0 10px; min-height: 46px; color: var(--muted); background: #fbfcfb; }
+    .input:focus-within { outline: 2px solid var(--green); outline-offset: 2px; }
+    .input:has(input:invalid) { border-color: #a72e25; }
+    input[type="number"] { width: 100%; min-width: 0; min-height: 44px; padding: 0; border: 0; outline: none; font: inherit; font-size: 1rem; color: var(--ink); background: transparent; }
+    .switches { margin-top: 20px; border-top: 1px solid var(--line); }
+    .toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 58px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .9375rem; font-weight: 650; cursor: pointer; }
+    .toggle small { display: block; color: var(--muted); font-size: .875rem; font-weight: 400; }
+    .toggle:has(input:disabled) { color: var(--muted); cursor: default; }
+    .toggle input { appearance: none; display: grid; align-items: center; flex: 0 0 44px; height: 26px; margin: 0; padding: 3px; border-radius: 20px; background: #677a72; cursor: inherit; }
+    .toggle input::before { content: ""; width: 20px; height: 20px; border-radius: 50%; background: white; }
+    .toggle input:checked { background: var(--green); }
+    .toggle input:checked::before { justify-self: end; }
+    .toggle input:disabled { opacity: .55; }
+    .toggle input:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+    .error { margin: 12px 0 0; color: #a72e25; font-size: .875rem; }
+    .result { background: #142f2a; border-color: #142f2a; color: #fff; }
+    .result h2 { color: #d4e5dd; }
+    dl { margin: 0; }
+    dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .monthly dt { font-size: .9375rem; color: #d4e5dd; }
+    .monthly dd { color: var(--net); font-weight: 760; font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.05em; line-height: 1.12; margin: 4px 0 20px; }
+    .totals > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 9px 0; border-top: 1px solid #49625a; font-size: .9375rem; }
+    .totals dt { color: #dfebe6; }
+    .totals dd { text-align: right; font-weight: 650; }
+    .distribution { margin: 18px 0 0; }
+    .distribution figcaption { margin-bottom: 8px; font-weight: 650; font-size: .875rem; }
+    .bar { display: flex; overflow: hidden; height: 13px; border-radius: 10px; background: #49625a; }
+    .bar span { flex: 0 0 0%; }
+    .key { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px 15px; margin: 9px 0 0; font-size: .875rem; color: #dfebe6; }
+    .key li { display: flex; align-items: center; gap: 6px; }
+    .key span { width: 9px; height: 9px; border-radius: 2px; }
+    .net { background: var(--net); }
+    .cost { background: var(--cost); }
+    .tax { background: var(--tax); }
+    .note { margin: 8px 0 0; color: #ffd79b; font-size: .875rem; }
+    footer { margin-top: 18px; color: var(--muted); font-size: .875rem; }
+    footer p { margin: 0; }
+    @media (max-width: 740px) { .calculator { grid-template-columns: 1fr; } }
+    @media (max-width: 360px) {
+      .page { width: calc(100% - 24px); }
+      .fields { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="scope">Nederland · Belastingjaar 2026</p>
+      <h1>ZZP Netto Inkomen &amp; Uurtarief Calculator</h1>
+      <p>Bekijk wat je per maand overhoudt bij jouw uurtarief.</p>
+    </header>
+
+    <div class="calculator">
+      <section class="card" aria-labelledby="inputs-heading">
+        <h2 id="inputs-heading">Jouw gegevens</h2>
+        <form id="calculator">
+          <div class="fields">
+            <label class="field" for="rate">
+              <span>Gewenst uurtarief <small>(excl. btw)</small></span>
+              <span class="input"><span aria-hidden="true">€</span><input id="rate" type="number" min="0" step="0.01" inputmode="decimal" value="75" required></span>
+            </label>
+            <label class="field" for="hours">
+              <span>Declarabele uren per week</span>
+              <span class="input"><input id="hours" type="number" min="0" max="168" step="any" inputmode="decimal" value="32" required></span>
+            </label>
+            <label class="field" for="weeks">
+              <span>Werkweken per jaar</span>
+              <span class="input"><input id="weeks" type="number" min="0" max="52" step="any" inputmode="decimal" value="46" required></span>
+            </label>
+            <label class="field" for="costs">
+              <span>Zakelijke kosten per jaar</span>
+              <span class="input"><span aria-hidden="true">€</span><input id="costs" type="number" min="0" step="0.01" inputmode="decimal" value="3000" required></span>
+            </label>
+          </div>
+          <div class="switches">
+            <label class="toggle" for="eligible">
+              <span>Voldoet aan urencriterium <small>1.225 uur per jaar</small></span>
+              <input id="eligible" type="checkbox" role="switch" checked>
+            </label>
+            <label class="toggle" for="starter">
+              <span>Recht op startersaftrek <small>Alleen bij het urencriterium</small></span>
+              <input id="starter" type="checkbox" role="switch">
+            </label>
+          </div>
+          <p class="error" id="error" role="status" hidden>Vul geldige bedragen en aantallen in. Gebruik maximaal 168 uur per week en 52 werkweken per jaar.</p>
+        </form>
+      </section>
+
+      <section class="card result" aria-labelledby="result-heading">
+        <h2 id="result-heading">Jouw netto inkomen</h2>
+        <dl class="monthly" aria-live="polite">
+          <dt>Netto per maand</dt>
+          <dd id="net-month">—</dd>
+        </dl>
+        <dl class="totals">
+          <div><dt>Jaaromzet</dt><dd id="revenue">—</dd></div>
+          <div><dt>Fiscale winst vóór aftrek</dt><dd id="profit">—</dd></div>
+          <div><dt>Belastbaar inkomen box 1</dt><dd id="taxable">—</dd></div>
+          <div><dt>Totale inkomstenbelasting</dt><dd id="tax">—</dd></div>
+          <div><dt>Netto per jaar</dt><dd id="net-year">—</dd></div>
+        </dl>
+        <figure class="distribution" id="distribution">
+          <figcaption>Verdeling van je jaaromzet</figcaption>
+          <div class="bar" id="bar" role="img" aria-label="Geen omzet">
+            <span class="net" id="net-share"></span>
+            <span class="cost" id="cost-share"></span>
+            <span class="tax" id="tax-share"></span>
+          </div>
+          <ul class="key">
+            <li><span class="net"></span> Netto inkomen</li>
+            <li><span class="cost"></span> Zakelijke kosten</li>
+            <li><span class="tax"></span> Belasting</li>
+          </ul>
+          <p class="note" id="distribution-note" hidden></p>
+        </figure>
+      </section>
+    </div>
+    <footer>
+      <p>Indicatieve berekening voor zzp’ers onder de AOW-leeftijd. De algemene heffingskorting, arbeidskorting en Zvw-bijdrage zijn buiten beschouwing gelaten.</p>
+    </footer>
+    <noscript>Zet JavaScript aan om je netto inkomen te berekenen.</noscript>
+  </main>
+  <script>
+    const taxRules = {
+      firstLimit: 38_883,
+      secondLimit: 78_426,
+      firstRate: 0.3575,
+      secondRate: 0.3756,
+      topRate: 0.495,
+      selfEmployedDeduction: 1_200,
+      starterDeduction: 2_123,
+      profitExemptionRate: 0.127,
+    };
+
+    function calculateIncome(rate, hours, weeks, costs, eligible, starter) {
+      const revenue = rate * hours * weeks;
+      const profit = revenue - costs;
+      let deduction = 0;
+      if (eligible) {
+        deduction = starter
+          ? taxRules.selfEmployedDeduction + taxRules.starterDeduction
+          : Math.min(taxRules.selfEmployedDeduction, Math.max(0, profit));
+      }
+
+      const afterDeduction = profit - deduction;
+      const exemption = afterDeduction * taxRules.profitExemptionRate;
+      const taxable = afterDeduction - exemption;
+
+      const firstBand = Math.min(Math.max(0, taxable), taxRules.firstLimit);
+      const secondBand = Math.max(0, Math.min(taxable, taxRules.secondLimit) - taxRules.firstLimit);
+      const topBand = Math.max(0, taxable - taxRules.secondLimit);
+
+      // Ook aftrek die de winst deels uit schijf 3 haalt valt onder de tariefbeperking.
+      const deductionInTopBand = Math.min(
+        Math.max(0, deduction + exemption),
+        Math.max(0, profit - taxRules.secondLimit),
+      );
+      const correction = deductionInTopBand * (taxRules.topRate - taxRules.secondRate);
+      const tax = firstBand * taxRules.firstRate
+        + secondBand * taxRules.secondRate + topBand * taxRules.topRate + correction;
+      const netYear = profit - tax;
+
+      return { revenue, profit, taxable, tax, netYear, netMonth: netYear / 12 };
+    }
+
+    const byId = (id) => document.getElementById(id);
+    const form = byId("calculator");
+    const numberInputs = ["rate", "hours", "weeks", "costs"].map(byId);
+    const eligible = byId("eligible");
+    const starter = byId("starter");
+    const money = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
+    const percentage = new Intl.NumberFormat("nl-NL", { style: "percent", maximumFractionDigits: 1 });
+    const outputIds = {
+      revenue: "revenue",
+      profit: "profit",
+      taxable: "taxable",
+      tax: "tax",
+      netYear: "net-year",
+      netMonth: "net-month",
+    };
+
+    function updateDistribution({ revenue, netYear, tax }, costs) {
+      const shares = revenue > 0
+        ? [Math.max(0, netYear) / revenue, Math.min(costs, revenue) / revenue, tax / revenue]
+        : [0, 0, 0];
+      const segments = ["net-share", "cost-share", "tax-share"];
+      segments.forEach((id, index) => {
+        byId(id).style.flexBasis = (shares[index] * 100) + "%";
+      });
+      const [netShare, costShare, taxShare] = shares.map((share) => percentage.format(share));
+      byId("bar").setAttribute("aria-label", revenue > 0
+        ? `Netto inkomen ${netShare}, zakelijke kosten ${costShare}, belasting ${taxShare}`
+        : "Geen omzet te verdelen");
+
+      const note = byId("distribution-note");
+      note.hidden = revenue > 0 && netYear >= 0;
+      if (netYear < 0) {
+        note.textContent = `Tekort na kosten en belasting: ${money.format(-netYear)}.`;
+      } else {
+        note.textContent = "Er is geen omzet te verdelen.";
+      }
+    }
+
+    function updateResults() {
+      starter.disabled = !eligible.checked;
+      const [rate, hours, weeks, costs] = numberInputs.map((input) => input.valueAsNumber);
+      const results = calculateIncome(rate, hours, weeks, costs, eligible.checked, starter.checked);
+      const valid = numberInputs.every((input) => input.validity.valid)
+        && Object.values(results).every(Number.isFinite);
+
+      byId("error").hidden = valid;
+      byId("distribution").hidden = !valid;
+      for (const [key, id] of Object.entries(outputIds)) {
+        byId(id).textContent = valid ? money.format(results[key]) : "—";
+      }
+      if (valid) updateDistribution(results, costs);
+    }
+
+    form.addEventListener("input", updateResults);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    updateResults();
+  </script>
+</body>
+</html>
