@@ -55,7 +55,8 @@
 
     * { box-sizing: border-box; }
     body { margin: 0; background: #f4f6f5; color: var(--ink); line-height: 1.5; }
-    .page { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: clamp(28px, 6vw, 66px) 0 32px; }
+    .page { width: min(1100px, calc(100% - 40px)); margin: 0 auto; }
+    main.page { padding-top: clamp(28px, 6vw, 66px); }
     header { margin-bottom: 28px; }
     .scope { color: var(--green); font-size: .875rem; font-weight: 750; margin: 0 0 8px; }
     h1 { margin: 0; font-size: clamp(1.9rem, 5vw, 3.35rem); line-height: 1.07; letter-spacing: -.045em; }
@@ -83,12 +84,13 @@
     .toggle input:checked { background: var(--green); }
     .toggle input:checked::before { justify-self: end; }
     .toggle input:disabled { opacity: .55; }
-    :is(.toggle input, .partner-link, summary):focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+    :is(a, button, select, summary, .toggle input):focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
     .error { margin: 12px 0 0; color: #a72e25; font-size: .875rem; }
 
     /* Resultaten en omzetverdeling */
     .result { background: #142f2a; border-color: #142f2a; color: #fff; }
-    .result h2 { color: #d4e5dd; }
+    .result h2 { color: #d4e5dd; scroll-margin-top: 20px; }
+    .result h2:focus { outline: 2px solid var(--net); outline-offset: 4px; }
     dl { margin: 0; }
     dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
     .monthly dt { font-size: .9375rem; color: #d4e5dd; }
@@ -109,9 +111,43 @@
     .note { margin: 8px 0 0; color: #ffd79b; font-size: .875rem; }
     .disclaimer { margin: 12px 0 0; color: var(--muted); font-size: .875rem; }
 
-    /* Partners */
-    .partners, .guide, .faq { margin-top: clamp(28px, 5vw, 52px); }
+    /* Branchekeuze en partners */
+    .industry, .partners, .guide, .faq, .site-footer { margin-top: clamp(28px, 5vw, 52px); }
     .intro { margin: 0 0 16px; color: var(--muted); max-width: 72ch; }
+    .industry-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: start; gap: 20px; }
+    .industry-controls { display: grid; gap: 14px; }
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: "";
+      position: absolute;
+      inset-inline-end: 16px;
+      top: calc(50% - 5px);
+      width: 8px;
+      height: 8px;
+      border: solid var(--green);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      pointer-events: none;
+    }
+    .industry select {
+      appearance: none;
+      width: 100%;
+      min-height: 46px;
+      padding: 9px 36px 9px 12px;
+      border: 1px solid #aebfb7;
+      border-radius: 9px;
+      background: #fbfcfb;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+    }
+    .industry-result { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: #f8faf9; }
+    .industry-average { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0 0 12px; }
+    .industry-average strong { color: var(--green); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+    .industry-ranges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .industry-ranges > div { border-top: 1px solid var(--line); padding-top: 8px; }
+    .industry-ranges dt { color: var(--muted); font-size: .875rem; }
+    .industry-ranges dd { font-size: .9375rem; font-weight: 650; }
     .disclosure { margin: 0 0 16px; color: var(--muted); font-size: .875rem; }
     .partner-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .partner { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #f8faf9; }
@@ -119,10 +155,28 @@
     .partner h3 { overflow-wrap: anywhere; }
     .partner ul { padding-inline-start: 1.2em; color: var(--muted); font-size: .9375rem; }
     .partner li + li { margin-top: 4px; }
-    .partner-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; width: 100%; margin-top: auto; padding: 9px 12px; border-radius: 9px; background: var(--green); color: #fff; text-align: center; text-decoration: none; font-size: .875rem; font-weight: 700; }
-    .partner-link:hover { background: #124c3e; }
+    .action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: var(--green);
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      font: inherit;
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .action:hover { background: #124c3e; }
+    .partner .action { margin-top: auto; }
 
-    /* Uitleg en veelgestelde vragen */
+    /* Uitleg, FAQ en footer */
     .guide p, .guide ul, .faq details p { max-width: 72ch; color: var(--muted); }
     .guide p { margin: 0 0 14px; }
     .guide h3 { margin-top: 24px; }
@@ -131,11 +185,29 @@
     .guide section + section { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
     .faq details { border-top: 1px solid var(--line); }
     .faq details:last-child { border-bottom: 1px solid var(--line); }
-    .faq summary { cursor: pointer; padding: 14px 4px; font-weight: 650; }
+    summary { cursor: pointer; padding: 14px 4px; font-weight: 650; }
     .faq details p { margin: 0; padding: 0 4px 14px; }
+    .site-footer { border-top: 1px solid var(--line); background: #eaf0ed; }
+    .footer-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: 24px;
+      padding: 28px 0 32px;
+    }
+    .site-footer h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    .site-footer p { margin: 0 0 10px; color: var(--muted); font-size: .9375rem; }
+    .site-footer a { color: var(--green); font-weight: 650; overflow-wrap: anywhere; }
+    .site-footer details { border-block: 1px solid #c5d4cc; }
+    .site-footer details p { margin-inline: 4px; }
 
     @media (max-width: 740px) {
-      .calculator, .partner-grid { grid-template-columns: 1fr; }
+      .calculator, .partner-grid, .industry-layout, .footer-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 400px) {
+      .industry-ranges { grid-template-columns: 1fr; }
+      .industry-ranges > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
     }
 
     @media (max-width: 360px) {
@@ -189,7 +261,7 @@
       </section>
 
       <section class="card result" aria-labelledby="result-heading">
-        <h2 id="result-heading">Jouw netto inkomen</h2>
+        <h2 id="result-heading" tabindex="-1">Jouw netto inkomen</h2>
         <dl class="monthly" aria-live="polite">
           <dt>Netto per maand</dt>
           <dd id="net-month">—</dd>
@@ -218,7 +290,43 @@
       </section>
     </div>
     <p class="disclaimer">Indicatieve berekening voor zzp’ers onder de AOW-leeftijd. De algemene heffingskorting, arbeidskorting en Zvw-bijdrage zijn buiten beschouwing gelaten.</p>
-    <noscript><p>Zet JavaScript aan om je netto inkomen te berekenen.</p></noscript>
+    <noscript><p>Zet JavaScript aan om je netto inkomen te berekenen en de branchekeuzehulp te gebruiken.</p></noscript>
+
+    <section class="card industry" id="industry-tool" aria-labelledby="industry-heading" hidden>
+      <h2 id="industry-heading">Gemiddeld ZZP-uurtarief per branche (2026)</h2>
+      <p class="intro" id="industry-description">Kies een branche en vergelijk indicatieve uurtarieven exclusief btw. De richttarieven en bandbreedtes zijn schattingen. Het tarief voor jouw opdracht hangt onder meer af van je ervaring, specialisatie en regio.</p>
+
+      <div class="industry-layout">
+        <div class="industry-controls">
+          <label class="field" for="industry-select">
+            Branche
+            <span class="select-wrap">
+              <select id="industry-select" aria-describedby="industry-description">
+                <option value="it">IT &amp; Software</option>
+                <option value="marketing">Marketing &amp; Communicatie</option>
+                <option value="construction">Bouw &amp; Techniek</option>
+                <option value="care">Zorg &amp; Welzijn</option>
+                <option value="design">Creatief &amp; Design</option>
+                <option value="consulting">Advies &amp; Consultancy</option>
+              </select>
+            </span>
+          </label>
+          <button class="action" id="use-industry-rate" type="button">Gebruik dit tarief in de calculator</button>
+        </div>
+
+        <div class="industry-result" aria-live="polite" aria-atomic="true">
+          <p class="industry-average">
+            <span>Richttarief</span>
+            <strong id="industry-rate"></strong>
+          </p>
+          <dl class="industry-ranges">
+            <div><dt>Junior</dt><dd id="industry-junior"></dd></div>
+            <div><dt>Medior</dt><dd id="industry-medior"></dd></div>
+            <div><dt>Senior</dt><dd id="industry-senior"></dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
 
     <section class="card partners" aria-labelledby="partners-heading">
       <h2 id="partners-heading">Handig voor jouw ZZP-administratie &amp; belasting</h2>
@@ -226,14 +334,14 @@
       <p class="disclosure">Aanbevolen partners (wij ontvangen mogelijk een vergoeding zonder extra kosten voor jou)</p>
 
       <div class="partner-grid">
-        <!-- Vervang de drie tijdelijke href-waarden door je eigen affiliatelinks. -->
+        <!-- Vervang deze tijdelijke href-waarden door je eigen affiliatelinks. -->
         <article class="partner" id="affiliate-bank">
           <h3>Zakelijke rekening</h3>
           <ul>
             <li>Automatisch geld verdelen over btw- en belastingpotjes</li>
             <li>Snel koppelen met je boekhoudprogramma</li>
           </ul>
-          <a class="partner-link" href="#affiliate-bank" rel="sponsored">Bekijk zakelijke rekeningen</a>
+          <a class="action" href="#affiliate-bank" rel="sponsored">Bekijk zakelijke rekeningen</a>
         </article>
 
         <article class="partner" id="affiliate-boekhouding">
@@ -243,7 +351,7 @@
             <li>Btw-aangifte automatisch samenstellen en via een koppeling indienen</li>
             <li>Facturen maken en versturen</li>
           </ul>
-          <a class="partner-link" href="#affiliate-boekhouding" rel="sponsored">Vergelijk boekhoudsoftware</a>
+          <a class="action" href="#affiliate-boekhouding" rel="sponsored">Vergelijk boekhoudsoftware</a>
         </article>
 
         <article class="partner" id="affiliate-aov">
@@ -253,7 +361,7 @@
             <li>Premie kan fiscaal aftrekbaar zijn</li>
             <li>Flexibel opzegbare polissen beschikbaar</li>
           </ul>
-          <a class="partner-link" href="#affiliate-aov" rel="sponsored">Bereken jouw AOV-premie</a>
+          <a class="action" href="#affiliate-aov" rel="sponsored">Bereken jouw AOV-premie</a>
         </article>
       </div>
     </section>
@@ -309,6 +417,23 @@
     </section>
   </main>
 
+  <footer class="site-footer">
+    <div class="page footer-layout">
+      <section aria-labelledby="about-heading">
+        <h2 id="about-heading">Over UurtariefRekenen.nl</h2>
+        <p>Met deze gratis tool kunnen Nederlandse zzp’ers inschatten wat ze bij een bepaald uurtarief overhouden. Gebruik de uitkomst om tarieven te vergelijken en je belastingreservering te plannen.</p>
+        <p>Vragen over de tool? Mail naar <a href="mailto:info@uurtariefrekenen.nl">info@uurtariefrekenen.nl</a>.</p>
+      </section>
+
+      <details>
+        <summary>Privacyverklaring &amp; Cookie-uitleg</summary>
+        <p>De calculator verwerkt je invoer lokaal in je browser. Ingevoerde bedragen en keuzes worden niet naar een server verzonden of daar opgeslagen. De calculator zelf plaatst geen cookies.</p>
+        <p>Als je op een uitgaande partnerlink klikt, kan de partner of het affiliatenetwerk een trackingcookie plaatsen om een aanvraag of aankoop aan deze website toe te schrijven. Voor cookies en gegevensverwerking op de bestemming geldt de privacy- en cookieverklaring van de betreffende partij.</p>
+        <p>Als je ons mailt, gebruiken we je e-mailadres en bericht om je vraag te beantwoorden.</p>
+      </details>
+    </div>
+  </footer>
+
   <script>
     const taxRules = {
       firstLimit: 38_883,
@@ -325,6 +450,7 @@
       const revenue = rate * hours * weeks;
       const profit = revenue - costs;
       let deduction = 0;
+
       if (eligible) {
         deduction = starter
           ? taxRules.selfEmployedDeduction + taxRules.starterDeduction
@@ -344,6 +470,7 @@
         Math.max(0, deduction + exemption),
         Math.max(0, profit - taxRules.secondLimit),
       );
+
       const correction = deductionInTopBand * (taxRules.topRate - taxRules.secondRate);
       const tax = firstBand * taxRules.firstRate
         + secondBand * taxRules.secondRate + topBand * taxRules.topRate + correction;
@@ -372,10 +499,12 @@
       const shares = revenue > 0
         ? [Math.max(0, netYear) / revenue, Math.min(costs, revenue) / revenue, tax / revenue]
         : [0, 0, 0];
+
       const segments = ["net-share", "cost-share", "tax-share"];
       segments.forEach((id, index) => {
         byId(id).style.flexBasis = (shares[index] * 100) + "%";
       });
+
       const [netShare, costShare, taxShare] = shares.map((share) => percentage.format(share));
       byId("bar").setAttribute("aria-label", revenue > 0
         ? `Netto inkomen ${netShare}, zakelijke kosten ${costShare}, belasting ${taxShare}`
@@ -408,6 +537,78 @@
     form.addEventListener("input", updateResults);
     form.addEventListener("submit", (event) => event.preventDefault());
     updateResults();
+
+    // Indicatieve bedragen per uur, exclusief btw.
+    const industryRates = {
+      it: {
+        rate: 90,
+        junior: [55, 75],
+        medior: [75, 100],
+        senior: [100, 140],
+      },
+      marketing: {
+        rate: 75,
+        junior: [45, 60],
+        medior: [60, 85],
+        senior: [85, 115],
+      },
+      construction: {
+        rate: 60,
+        junior: [35, 50],
+        medior: [50, 70],
+        senior: [70, 95],
+      },
+      care: {
+        rate: 55,
+        junior: [35, 45],
+        medior: [45, 65],
+        senior: [65, 90],
+      },
+      design: {
+        rate: 65,
+        junior: [40, 55],
+        medior: [55, 80],
+        senior: [80, 110],
+      },
+      consulting: {
+        rate: 95,
+        junior: [60, 80],
+        medior: [80, 110],
+        senior: [110, 160],
+      },
+    };
+
+    const industrySelect = byId("industry-select");
+    const wholeEuros = new Intl.NumberFormat("nl-NL", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    });
+
+    function updateIndustry() {
+      const industry = industryRates[industrySelect.value];
+      byId("industry-rate").textContent = `${wholeEuros.format(industry.rate)} per uur`;
+
+      for (const level of ["junior", "medior", "senior"]) {
+        const [minimum, maximum] = industry[level];
+        byId(\`industry-\${level}\`).textContent =
+          \`\${wholeEuros.format(minimum)}–\${wholeEuros.format(maximum)}\`;
+      }
+    }
+
+    industrySelect.addEventListener("change", updateIndustry);
+    byId("use-industry-rate").addEventListener("click", () => {
+      byId("rate").valueAsNumber = industryRates[industrySelect.value].rate;
+      updateResults();
+
+      if (form.reportValidity()) {
+        byId("result-heading").focus({ preventScroll: true });
+        byId("result-heading").scrollIntoView({ block: "start" });
+      }
+    });
+
+    updateIndustry();
+    byId("industry-tool").hidden = false;
   </script>
 </body>
 </html>
